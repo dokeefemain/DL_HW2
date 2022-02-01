@@ -31,10 +31,15 @@ def softmax_loss_naive(W, X, y, reg):
   # of softmax. Don't forget the regularization!                              #
   #############################################################################
   num_train = X.shape[0]
+  reg1 = 0
+  summ = 0
 
   for i in xrange(num_train):
     scores = X[i].dot(W)
     
+    
+
+  reg1 = np.sum(W[i]**2) * reg
 
   #############################################################################
   #                          END OF YOUR CODE                                 #
