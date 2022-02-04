@@ -22,7 +22,7 @@ def softmax_loss_naive(W, X, y, reg):
   """
   # Initialize the loss and gradient to zero.
   loss = 0.0
-  dW = np.zeros_like(W)
+  dW = np.zeros_like(W).transpose()
 
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using explicit loops.     #
@@ -33,13 +33,26 @@ def softmax_loss_naive(W, X, y, reg):
   num_train = X.shape[0]
   reg1 = 0
   summ = 0
-
+  scores = X[0].dot(W)
+  count = 0
   for i in xrange(num_train):
     scores = X[i].dot(W)
-    
-    
+    exp = np.exp(scores)
+    prob = exp / np.sum(exp)
+    for j in range(10):
+      if j != y[i]:
+        dW[j,:] += X[i] * prob[j]
+      else:
+        dW[j,:] += X[i] * (prob[j] - 1)
 
-  reg1 = np.sum(W[i]**2) * reg
+    Li = -1 * np.log(prob)
+    loss += np.sum(Li) / len(Li) + np.sum(W ** 2) * reg
+
+  loss = loss / num_train
+  dW = dW / num_train
+  dW = np.array(dW).transpose()
+
+  dW += reg * W
 
   #############################################################################
   #                          END OF YOUR CODE                                 #
@@ -66,11 +79,38 @@ def softmax_loss_vectorized(W, X, y, reg):
   #############################################################################
   num_train = X.shape[0]
   scores = X.dot(W)
-  
+  exp = np.exp(scores)
+  prob = np.multiply(exp, 1 / np.sum(exp, axis=1).reshape((-1, 1)))
+
+  X1 = np.tile(X,10)
+
+  prob1 =np.repeat(prob.reshape(-1,1),X.shape[1]).reshape(X1.shape)
+  tmp = np.multiply(X1,prob1)
+
+
+  prob_y = (np.tile(np.choose(y, np.array(prob).transpose()).reshape((-1,1)),X.shape[1])) - 1
+  tmp_y = np.multiply(X, prob_y)
+
+  y_range = (y) * X.shape[1]
+
+  y_range = y_range.reshape((-1,1)) + np.arange(X.shape[1])
+  x_ind = np.repeat(np.arange(np.array(y_range).shape[0]),y_range.shape[1]).reshape((-1,1))
+
+  tmp[np.array(x_ind).flatten(),np.array(y_range).flatten()] = np.array(tmp_y).flatten()
+
+  sumW = np.sum(tmp,axis = 0)
+  sumW = sumW.reshape((dW.shape[1],dW.shape[0]))
+  dW = np.array(sumW).transpose()
+  dW = dW / num_train
+  dW += reg * W
+
+  Li = -1 * np.log(prob)
+  loss_r = np.sum(Li, axis=1) / len(Li[0]) + np.sum(W ** 2) * reg
+  loss = np.sum(loss_r) / num_train
+
 
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
 
   return loss, dW
-

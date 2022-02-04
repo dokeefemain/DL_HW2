@@ -52,6 +52,10 @@ class LinearClassifier(object):
       # Hint: Use np.random.choice to generate indices. Sampling with         #
       # replacement is faster than sampling without replacement.              #
       #########################################################################
+      ind = np.random.choice(num_train, batch_size)
+      X_batch = X[ind]
+      y_batch = y[ind]
+
 
 
 
@@ -68,6 +72,7 @@ class LinearClassifier(object):
       # TODO:                                                                 #
       # Update the weights using the gradient and the learning rate (SGD).    #
       #########################################################################
+      self.W -= learning_rate * grad
 
 
       #########################################################################
@@ -98,6 +103,7 @@ class LinearClassifier(object):
     # TODO:                                                                   #
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
+    y_pred = np.argmax(np.dot(X,self.W), axis=1)
 
 
     ###########################################################################
@@ -127,5 +133,5 @@ class Softmax(LinearClassifier):
   """ A subclass that uses the Softmax + Cross-entropy loss function """
 
   def loss(self, X_batch, y_batch, reg):
-    return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
+    return softmax_loss_naive(self.W, X_batch, y_batch, reg)
 
